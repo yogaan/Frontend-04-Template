@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="author" content="yoga">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ticTacToe</title>
+  <style>
+    .cell {
+      width: 100px;
+      height: 100px;
+      display: inline-block;
+      vertical-align: middle;
+      border: 1px solid #fff;
+      background-color: green;
+      font-size: 50px;
+      text-align: center;
+      line-height: 100px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script>
+    window.onload = function () {
+      const board = document.querySelector('#root');
+      const pattern = Array(9).fill(0);
+      // pattern[1] = 2;
+      // pattern[4] = 1;
+      let color = 1;
+      function userMove(i) {
+        if (pattern[i]) {
+          return;
+        }
+        pattern[i] = color;
+        afterMove();
+        computerMove();
+      }
+
+      function computerMove () {
+        let choise = bestChoise(pattern, color);
+        if (choise.point) {
+          pattern[choise.point] = color
+        }
+        afterMove();
+      }
+
+      function afterMove () {
+        if (checkIsWin(pattern, color)) {
+          alert(`${color == 1 ? '⭕️' : '❌'}获胜了`)
+        }
+        color = 3 - color;
+        render();
+      }
+
+      function checkIsWin(pattern, color) {
+        for (let i = 0; i < 3; i++) {
+          let isWin = true;
+          for (let j = 0; j < 3; j++) {
+            if (pattern[i * 3 + j] !== color) {
+              isWin = false;
+            }
+          } 
+          if (isWin) {
+            return true;
+          }
+        }
+        for (let i = 0; i < 3; i++) {
+          let isWin = true;
+          for (let j = 0; j < 3; j++) {
+            if (pattern[i + j * 3] !== color) {
+              isWin = false;
+            }
+          } 
+          if (isWin) {
+            return true;
+          }
+        }
+        let isWin = true;
+        for (let i = 0; i < 3; i++) {
+          if (pattern[i * 3 + i] !== color) {
+            isWin = false;
+            break;
+          }
+        }
+        if (isWin) {
+          return true;
+        }
+        isWin = true;
+        for (let i = 0; i < 3; i++) {
+          if (pattern[i * 3 + 2 - i] !== color) {
+            isWin = false;
+            break;
+          }
+        }
+        if (isWin) {
+          return true;
+        }
+      }
+      
+      function willWin (pattern, color) {
+        for (let i = 0; i < pattern.length; i++) {
+          if (pattern[i]) {
+            continue;
+          } 
+          let tmp = clone(pattern);
+          tmp[i] = color;
+          if (checkIsWin(tmp, color)) {
+            return i;
+          }
+        }
+        return null;
+      }
+      function clone (obj) {
+        return Object.create(obj  )
+      }
+
+      function bestChoise (pattern, color) {
+        let point = willWin(pattern, color)
+        if (point) {
+          return {
+            point,
+            result: 1,
+          }
+        }
+        let result = -1;
+        for (let i = 0; i < pattern.length; i++) {
+          if (pattern[i]) {
+            continue;
+          }
+          let tmp = clone(pattern)
+          tmp[i] = color;
+          let opp = bestChoise(tmp, 3 - color)
+          if (-opp.result >= result) {
+              result = -opp.result;
+              point = i;
+          }
+          if (result === 1) {
+            break;
+          }
+        }
+        return {
+          point,
+          result: point ? result : 0
+        }
+      }
+      const render = () => {
+        board.innerHTML = '';
+        for (let i = 0; i < pattern.length; i++) {
+          if (i !== 0 && i % 3 === 0) {
+            board.appendChild(document.createElement('br'))
+          }
+          const element = document.createElement('div');
+          if (pattern[i]) {
+            const textNode = document.createTextNode(pattern[i] == 1 ? '⭕️' : '❌')
+            element.appendChild(textNode)
+          }
+          element.classList.add('cell');
+          element.addEventListener('click', () => userMove(i))
+          board.appendChild(element)
+        }
+      }
+      render()
+    }
+  </script>
+</body>
+
+</html>
