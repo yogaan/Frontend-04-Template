@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LL算法构建AST-正则表达式</title>
+</head>
+<body>
+  <script>
+    const regexp = /([0-9\.]+)|([ \t]+)|([\r\n]+)|(\*)|(\/)|(\+)|(\-)/g;
+    const dictionary = ['Number', 'WhiteSpace', 'LineTerminator', '*', '/', '+', '-'];
+    function * tokenize (source)  {
+      var result = null;
+      let lastIndex = null;
+      while (true) {
+        lastIndex = regexp.lastIndex;
+        result = regexp.exec(source);
+        if (!result) {
+          break;
+        }
+        if (regexp.lastIndex - lastIndex > result[0].length) {
+          // 长度超了说明有不认识的字符或格式
+          console.error('错误:', regexp.lastIndex, lastIndex, result[0].length)
+          break;
+        }
+        let token = {
+          type: null,
+          value: result[0]
+        }
+        for (let i = 1; i<=dictionary.length; i++) {
+          if(result[i]) {
+            token.type = dictionary[i - 1]
+          }
+        }
+        yield token
+      }
+      yield {
+          type: 'EOF',
+        }
+    }
+    for (let token of tokenize('10 + 20 * 25 - 30 / 3')) {
+      console.info('token', token)
+    }
+  </script>
+</body>
+</html>
