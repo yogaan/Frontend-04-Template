@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>rgb</title>
+</head>
+
+<body>
+  <input id="r" type="range" min="0" max="255" />
+  <input id="g" type="range" min="0" max="255" />
+  <input id="b" type="range" min="0" max="255" />
+  <div id="bgColor" style="width: 100px;height: 100px;"></div>
+  <script>
+    let o = { r: 0, g: 0, b: 0 }
+    let callbacks = new Map();
+    // 缓存每一个对象
+    let reactivities = new Map();
+    let useReactivities = [];
+    const selectors = ['r', 'g', 'b'];
+    let data = reactive(o)
+    effect(() => {
+      selectors.forEach((selector) => {
+        document.getElementById(selector).value = data[selector]
+      })
+    });
+
+    selectors.forEach((selector) => {
+      document.getElementById(selector).addEventListener('input', (e) => {
+        data[selector] = e.target.value
+        document.getElementById('bgColor').style.background = `rgb(${data.r}, ${data.g}, ${data.b})`;
+      })
+    })
+
+    function effect(callback) {
+      // callbacks.push(callback)
+      console.info('callbaclk', callback)
+      useReactivities = [];
+      // 调用callback后，callback里调用的reactive属性,会将object和property属性push到useReactivities
+      callback();
+
+      for (const reactivity of useReactivities) {
+        if (!callbacks.has(reactivity[0])) {
+          callbacks.set(reactivity[0], new Map())
+        }
+        if (!callbacks.get(reactivity[0]).has(reactivity[1])) {
+          callbacks.get(reactivity[0]).set(reactivity[1], [])
+        }
+        callbacks.get(reactivity[0]).get(reactivity[1]).push(callback)
+      }
+    }
+    function reactive(object) {
+      if (reactivities.has(object)) {
+        return reactivities.get(object)
+      }
+      let proxy = new Proxy(object, {
+        get: function (obj, property) {
+          useReactivities.push([obj, property])
+          if (typeof obj[property] === 'object') {
+            return reactive(obj[property])
+          }
+          return obj[property]
+        },
+        set: function (obj, property, value) {
+          obj[property] = value
+          if (callbacks.has(obj) && callbacks.get(obj).has(property)) {
+            for (const cb of callbacks.get(obj).get(property)) {
+              cb()
+            }
+          }
+        }
+      })
+      reactivities.set(object, proxy)
+      return proxy;
+    }
+
+  </script>
+</body>
+
+</html>

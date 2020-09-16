@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>range-drag</title>
+</head>
+<body>
+  <div id="draggable" style="width: 100px;height: 100px;background-color: blue;"></div>
+  <script>
+    const dragDom = document.getElementById('draggable');
+    dragDom.addEventListener('mousedown', () => {
+      const onMousemove = () => {
+        console.info('move');
+      }
+      const onMouseup = () => {
+        document.removeEventListener('mousemove', onMousemove)
+        document.removeEventListener('mouseup', onMouseup)
+        console.info('up')
+      }
+      // 假如在外面监听document的mousemove事件的话，那鼠标还没按下时，就会一直触发mousemove事件，浪费性能。在需要拖拽的元素上按下鼠标后，再监听鼠标的移动事件，性能较好
+      document.addEventListener('mousemove', onMousemove)
+      document.addEventListener('mouseup', onMouseup)
+    })
+  </script>
+</body>
+</html>

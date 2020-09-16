@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>wildcard</title>
+</head>
+
+<body>
+  <script>
+    /**
+     *  带通配符的字符串模式
+     *  *匹配任意数量的任意字符，?匹配任意字符
+     */
+    function wildcard(source, pattern) {
+      let starCount = 0;
+      for (let i = 0; i < pattern.length; i++) {
+        if (pattern[i] === '*') {
+          starCount ++;
+        }
+      }
+      if (starCount === 0) {
+        for (let i = 0; i< pattern.length; i++) {
+          if (pattern[i] !== source[i] && pattern[i] !== '?') {
+            return false
+          }
+          return;
+        } 
+      }
+      let i = 0;
+      let index = 0;
+      for (i = 0; pattern[i] !== '*'; i++) {
+        if (pattern[i] !== source[i] && pattern[i] !== '?') {
+          return false;
+        }
+      }
+      lastIndex = i;
+
+      // 不匹配最后一个*，所以这里是starCount-1
+      for (let p = 0; p < starCount - 1; p++) {
+        i++;
+        // 星号后面的格式
+        let subPattern = '';
+        while (pattern[i] !== '*') {
+          subPattern += pattern[i]
+          i++;
+        }
+        let reg = new RegExp(subPattern.replace(/\?/g, '[\\s\\S]'), 'g')
+        reg.exec(source);
+        // 记录下次匹配的开始位置
+        reg.lastIndex = lastIndex;
+        console.log(reg.exec(source))
+        lastIndex = reg.lastIndex
+      }
+
+      for (let j = 0; j < source.length - lastIndex && pattern[pattern.length - j] !== '*'; j++) {
+        if (pattern[pattern.length - j] !== source[source.length - j] && pattern[pattern.length - j] !== '?') {
+          return false;
+        }
+      }
+      return true;
+    }
+
+  </script>
+</body>
+
+</html>

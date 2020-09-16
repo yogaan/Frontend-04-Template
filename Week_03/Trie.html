@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>字典树</title>
+</head>
+<body>
+  <script>
+    const $ = Symbol('$');
+    class Trie {
+      constructor () {
+        // javascript里用来保存字典树最好的数据结构是Map或Object
+        this.root = Object.create(null)
+      }
+      insert (word) {
+        let node = this.root;
+        for (const char of word) {
+          if (!node[char]) {
+            node[char] = Object.create(null)
+          }
+          node = node[char]
+        }
+        if (!($ in node)) {
+          node[$] = 0
+        }
+        node[$]++;
+      }
+      most () {
+        let max = 0;
+        let maxWord = null;
+        function visit (node, word) {
+          if (node[$] && node[$] > max) {
+            max = node[$];
+            maxWord = word
+          }
+          for (const n in node) {
+            // 将当前节点的字符串加上新产生的字符传到下一级，这样在最后就能取到完整字符串
+            visit(node[n], word + n)
+          }
+        }
+        visit(this.root, '')
+        console.log(maxWord, max)
+      }
+    }
+    
+    function randomWord (length) {
+      let s = '';
+      for (let i = 0; i < length; i++) {
+        s += String.fromCharCode(Math.random() * 26 + 'a'.charCodeAt(0))
+      }
+      return s;
+    }
+    
+    let trie = new Trie()
+    
+    for (let i = 0; i < 10000; i++) {
+      trie.insert(randomWord(4))
+    }
+    
+    console.log(trie.root)
+    
+    </script>
+</body>
+</html>
